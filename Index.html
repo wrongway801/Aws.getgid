@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AWS Cloud Practitioner Study Guide</title>
+<style>
+  :root {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f7f8fa;
+    --border: #dde1e8;
+    --aws: #d9800a;
+    --aws-dim: #b56a08;
+    --green: #1a7f37;
+    --blue: #0550ae;
+    --muted: #6e7787;
+    --text: #1c2333;
+    --danger: #b91c1c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
+
+header {
+border-bottom: 1px solid var(–border);
+padding: 16px 28px;
+display: flex; align-items: center; gap: 14px;
+background: var(–surface);
+position: sticky; top: 0; z-index: 100;
+box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.logo {
+font-size: 10px; font-weight: 700; color: var(–aws);
+letter-spacing: 2px; text-transform: uppercase;
+border: 2px solid var(–aws); padding: 4px 9px; border-radius: 4px;
+white-space: nowrap;
+}
+header h1 { font-size: 17px; font-weight: 700; flex: 1; color: var(–text); }
+header h1 span { color: var(–aws); }
+.overall-progress { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(–muted); }
+.overall-bar { width: 130px; height: 6px; background: var(–border); border-radius: 3px; overflow: hidden; }
+.overall-fill { height: 100%; background: linear-gradient(90deg, var(–aws), #f0a830); border-radius: 3px; transition: width 0.5s; }
+
+.container { display: grid; grid-template-columns: 255px 1fr; min-height: calc(100vh - 57px); }
+
+aside {
+border-right: 1px solid var(–border);
+background: var(–surface);
+padding: 16px 0;
+overflow-y: auto;
+position: sticky; top: 57px; height: calc(100vh - 57px);
+}
+.sidebar-label {
+font-size: 9px; font-weight: 700; letter-spacing: 2px;
+color: var(–muted); text-transform: uppercase;
+padding: 0 18px 6px; margin-top: 14px;
+}
+.week-btn {
+width: 100%; text-align: left; background: none; border: none;
+padding: 9px 18px; cursor: pointer; color: var(–muted);
+font-size: 13px; font-weight: 600;
+display: flex; align-items: center; gap: 8px;
+border-left: 2px solid transparent; transition: all 0.12s;
+}
+.week-btn:hover { color: var(–text); background: var(–surface2); }
+.week-btn.active { color: var(–aws); border-left-color: var(–aws); background: #fff8ee; }
+.day-btn {
+width: 100%; text-align: left; background: none; border: none;
+padding: 7px 18px 7px 34px; cursor: pointer; color: var(–muted);
+font-size: 12px; display: flex; align-items: center; gap: 8px;
+border-left: 2px solid transparent; transition: all 0.12s;
+}
+.day-btn:hover { color: var(–text); background: var(–surface2); }
+.day-btn.active { color: var(–blue); border-left-color: var(–blue); background: #f0f4ff; }
+.day-btn.completed { color: var(–green); }
+.day-dot { width: 6px; height: 6px; border-radius: 50%; background: var(–border); flex-shrink: 0; }
+.day-btn.completed .day-dot { background: var(–green); }
+.day-btn.active .day-dot { background: var(–blue); }
+
+main { padding: 28px 36px; max-width: 840px; }
+
+.day-header { margin-bottom: 24px; }
+.day-tag { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: var(–aws); text-transform: uppercase; margin-bottom: 5px; }
+.day-title { font-size: 26px; font-weight: 800; margin-bottom: 5px; color: var(–text); }
+.day-subtitle { font-size: 14px; color: var(–muted); }
+.time-badge {
+display: inline-flex; align-items: center; gap: 5px;
+background: var(–surface2); border: 1px solid var(–border);
+border-radius: 20px; padding: 4px 12px;
+font-size: 12px; color: var(–muted); margin-top: 10px;
+}
+
+.complete-banner {
+background: #f0fdf4; border: 1px solid #86efac;
+border-radius: 10px; padding: 16px 20px; margin-bottom: 18px;
+display: none; align-items: center; gap: 14px;
+}
+.complete-banner.show { display: flex; }
+.complete-banner h3 { font-size: 15px; font-weight: 700; color: var(–green); }
+.complete-banner p { font-size: 13px; color: #4ade80; margin-top: 2px; color: #166534; }
+
+.day-progress-wrap {
+background: var(–surface); border: 1px solid var(–border);
+border-radius: 10px; padding: 14px 18px; margin-bottom: 20px;
+display: flex; align-items: center; gap: 14px;
+}
+.day-progress-bar { flex: 1; height: 8px; background: var(–border); border-radius: 4px; overflow: hidden; }
+.day-progress-fill { height: 100%; background: linear-gradient(90deg, var(–green), #22c55e); border-radius: 4px; transition: width 0.4s; }
+.day-progress-label { font-size: 12px; color: var(–muted); white-space: nowrap; }
+
+.section { background: var(–surface); border: 1px solid var(–border); border-radius: 10px; margin-bottom: 18px; overflow: hidden; }
+.section-header {
+padding: 13px 18px; border-bottom: 1px solid var(–border);
+display: flex; align-items: center; gap: 9px;
+font-weight: 700; font-size: 14px; color: var(–text);
+background: var(–surface2);
+}
+
+.checklist { padding: 4px 0; }
+.check-item {
+display: flex; align-items: flex-start; gap: 12px;
+padding: 10px 18px; cursor: pointer; transition: background 0.1s;
+border-bottom: 1px solid var(–border);
+}
+.check-item:last-child { border-bottom: none; }
+.check-item:hover { background: var(–surface2); }
+.check-item input[type=checkbox] { display: none; }
+.checkmark {
+width: 18px; height: 18px; border: 2px solid var(–border);
+border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+display: flex; align-items: center; justify-content: center;
+transition: all 0.15s; font-size: 11px; color: white;
+background: white;
+}
+.check-item.checked .checkmark { background: var(–green); border-color: var(–green); }
+.check-text { font-size: 14px; line-height: 1.4; color: var(–text); transition: color 0.15s; flex: 1; }
+.check-item.checked .check-text { color: var(–muted); text-decoration: line-through; }
+.check-time { font-size: 11px; color: var(–muted); white-space: nowrap; margin-top: 2px; }
+
+.quiz-wrap { padding: 18px; }
+.quiz-q { font-size: 15px; font-weight: 600; margin-bottom: 14px; line-height: 1.5; color: var(–text); }
+.quiz-option {
+display: flex; align-items: center; gap: 10px;
+padding: 10px 14px; border: 1px solid var(–border);
+border-radius: 8px; margin-bottom: 8px; cursor: pointer;
+font-size: 13px; transition: all 0.15s;
+background: var(–surface2); color: var(–text);
+}
+.quiz-option:hover:not(.disabled) { border-color: var(–blue); background: #eef4ff; }
+.quiz-option.correct { border-color: var(–green); background: #f0fdf4; color: var(–green); }
+.quiz-option.wrong { border-color: var(–danger); background: #fef2f2; color: var(–danger); }
+.quiz-option.disabled { cursor: default; }
+.opt-letter {
+font-size: 11px; font-weight: 700;
+width: 22px; height: 22px; border-radius: 4px;
+background: var(–border); color: var(–text);
+display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.quiz-option.correct .opt-letter { background: var(–green); color: white; }
+.quiz-option.wrong .opt-letter { background: var(–danger); color: white; }
+
+.quiz-feedback {
+margin-top: 12px; padding: 12px 14px; border-radius: 8px;
+font-size: 13px; line-height: 1.5; display: none;
+}
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct-fb { background: #f0fdf4; border: 1px solid #86efac; color: #166534; }
+.quiz-feedback.wrong-fb { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; }
+
+.quiz-nav { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
+.quiz-counter { font-size: 11px; color: var(–muted); }
+.btn {
+background: var(–aws); color: white; border: none;
+padding: 8px 18px; border-radius: 6px; font-weight: 700;
+font-size: 13px; cursor: pointer; transition: background 0.15s;
+}
+.btn:hover { background: var(–aws-dim); }
+.btn.secondary { background: var(–surface2); color: var(–text); border: 1px solid var(–border); }
+.btn.secondary:hover { background: var(–border); }
+
+.quiz-score-wrap { text-align: center; padding: 24px; }
+.score-circle {
+width: 80px; height: 80px; border-radius: 50%;
+border: 3px solid var(–aws);
+display: flex; align-items: center; justify-content: center;
+font-size: 22px; font-weight: 700; color: var(–aws); margin: 0 auto 12px;
+}
+.score-msg { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(–text); }
+.score-sub { font-size: 13px; color: var(–muted); margin-bottom: 16px; }
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="logo">AWS CLF-C02</div>
+  <h1>Cloud Practitioner <span>Study Guide</span></h1>
+  <div class="overall-progress">
+    <span id="overallPct">0%</span>
+    <div class="overall-bar"><div class="overall-fill" id="overallFill" style="width:0%"></div></div>
+    <span id="overallDays">0/20 days</span>
+  </div>
+</header>
+
+<div class="container">
+  <aside id="sidebar"></aside>
+  <main id="main"></main>
+</div>
+
+<script>
+const curriculum = [
+  { week:1, title:"Cloud Concepts", days:[
+    { title:"What is Cloud Computing?", subtitle:"Core definitions, benefits, and deployment models",
+      tasks:[
+        {text:"Watch: AWS Cloud Practitioner Essentials — Module 1 (AWS Skill Builder, free)",time:"30 min"},
+        {text:"Read: AWS overview page — What is Cloud Computing?",time:"15 min"},
+        {text:"Write in your own words: what is cloud computing and why do companies use it?",time:"10 min"},
+        {text:"Learn the 6 benefits of cloud computing (trade CapEx for OpEx, scale, speed, etc.)",time:"20 min"},
+        {text:"Study 3 deployment models: Public, Private, Hybrid Cloud",time:"15 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Which of the following is a benefit of cloud computing over on-premises infrastructure?",opts:["You pay a large upfront cost for hardware","You trade capital expense for variable expense","You are responsible for all physical security","Scaling takes weeks of planning"],ans:1,exp:"Cloud computing lets you pay only for what you use (variable expense) instead of investing in hardware upfront (capital expense). This is one of the 6 core benefits AWS highlights."},
+        {q:"A company wants to keep some servers in their own data center while using AWS for other workloads. What deployment model is this?",opts:["Public Cloud","Private Cloud","Hybrid Cloud","Multi-Cloud"],ans:2,exp:"A Hybrid Cloud model combines on-premises (private) infrastructure with a public cloud like AWS, allowing data and apps to be shared between them."},
+        {q:"Which of these is NOT one of the 6 advantages of cloud computing?",opts:["Stop guessing capacity","Increase speed and agility","Pay for the data center upfront","Go global in minutes"],ans:2,exp:"Paying upfront for a data center is the OLD way. Cloud removes this. The 6 advantages are all about reducing cost, increasing speed, and scaling easily."},
+      ]
+    },
+    { title:"AWS Global Infrastructure", subtitle:"Regions, Availability Zones, and Edge Locations",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 2: Global Infrastructure",time:"25 min"},
+        {text:"Study: AWS Regions — what they are and how to choose one (compliance, latency, cost)",time:"20 min"},
+        {text:"Study: Availability Zones (AZs) — at least 3 per Region, physically separate",time:"15 min"},
+        {text:"Study: Edge Locations — used by CloudFront CDN for caching content closer to users",time:"15 min"},
+        {text:"Flashcard drill: Region vs AZ vs Edge Location differences",time:"15 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"What is an AWS Availability Zone (AZ)?",opts:["A geographic area like US East or EU West","One or more discrete data centers with redundant power and networking","A caching server close to end users","An AWS region subdivision based on billing"],ans:1,exp:"An AZ is one or more discrete data centers, each with redundant power, networking, and connectivity. Multiple AZs exist within each Region to support high availability."},
+        {q:"Why would a company deploy resources in multiple Availability Zones?",opts:["To reduce monthly AWS costs","To meet compliance with international data laws","To ensure high availability if one data center fails","To access more AWS services"],ans:2,exp:"Deploying across multiple AZs protects your application from a single point of failure. If one AZ goes down, your app keeps running in another."},
+        {q:"Which AWS feature uses Edge Locations to deliver content with low latency?",opts:["Amazon EC2","Amazon S3","Amazon CloudFront","AWS Direct Connect"],ans:2,exp:"Amazon CloudFront is AWS's Content Delivery Network (CDN). It caches copies of content at Edge Locations worldwide so users get data from the closest location, reducing latency."},
+      ]
+    },
+    { title:"Core AWS Services Overview", subtitle:"Compute, Storage, Databases, Networking basics",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Modules 3 & 4 (Compute and Networking)",time:"35 min"},
+        {text:"Learn: Amazon EC2 — virtual servers in the cloud, instance types, pricing models",time:"20 min"},
+        {text:"Learn: Amazon S3 — object storage, buckets, use cases",time:"15 min"},
+        {text:"Learn: Amazon VPC — virtual private cloud, subnets, security groups",time:"15 min"},
+        {text:"Write a one-sentence description of each: EC2, S3, RDS, VPC, Lambda",time:"15 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"What is Amazon EC2?",opts:["A managed database service","A virtual server you can run in the cloud","An object storage service","A DNS routing service"],ans:1,exp:"EC2 (Elastic Compute Cloud) provides scalable virtual servers in the cloud. You choose the OS, CPU, memory, and storage, and pay only for what you use."},
+        {q:"A developer needs to store images uploaded by users. Which AWS service is best?",opts:["Amazon RDS","Amazon EC2","Amazon S3","AWS Lambda"],ans:2,exp:"Amazon S3 (Simple Storage Service) is object storage designed for storing files like images, videos, and backups. It is highly durable and scalable."},
+        {q:"What does a Security Group do in AWS?",opts:["Encrypts data stored in S3","Acts as a virtual firewall controlling inbound/outbound traffic to EC2 instances","Manages IAM user permissions","Monitors billing alerts"],ans:1,exp:"A Security Group acts as a stateful virtual firewall for EC2 instances. It controls what traffic is allowed in (inbound rules) and out (outbound rules) of an instance."},
+      ]
+    },
+    { title:"Storage Services Deep Dive", subtitle:"S3, EBS, EFS, and Storage Gateway",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 5: Storage",time:"30 min"},
+        {text:"Learn S3 storage classes: Standard, Intelligent-Tiering, Standard-IA, Glacier",time:"20 min"},
+        {text:"Learn: Amazon EBS — block storage attached to EC2, like a hard drive",time:"15 min"},
+        {text:"Learn: Amazon EFS — shared file storage, mounts to multiple EC2 instances",time:"15 min"},
+        {text:"Create a comparison table: S3 vs EBS vs EFS (type, use case, access)",time:"20 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Which S3 storage class is best for data accessed less than once a month but needs rapid access?",opts:["S3 Standard","S3 Intelligent-Tiering","S3 Standard-Infrequent Access (IA)","S3 Glacier Deep Archive"],ans:2,exp:"S3 Standard-IA is for infrequently accessed data that still needs to be retrieved quickly. It costs less than S3 Standard but charges a retrieval fee."},
+        {q:"What type of storage is Amazon EBS?",opts:["Object storage","File storage","Block storage","Archive storage"],ans:2,exp:"EBS (Elastic Block Store) is block storage — like a virtual hard drive that attaches to an EC2 instance. Used for OS drives and databases."},
+        {q:"You need multiple EC2 instances to share the same file system simultaneously. Which service?",opts:["Amazon EBS","Amazon S3","Amazon EFS","AWS Storage Gateway"],ans:2,exp:"Amazon EFS (Elastic File System) is a managed NFS file system that can be mounted by multiple EC2 instances simultaneously across multiple AZs."},
+      ]
+    },
+    { title:"Week 1 Review & Practice", subtitle:"Reinforce everything covered this week",
+      tasks:[
+        {text:"Re-read all your written notes from Days 1–4",time:"20 min"},
+        {text:"Flashcard review: all key terms from Week 1 (use Quizlet or write your own)",time:"20 min"},
+        {text:"Watch: AWS re:Invent overview video — What is AWS? (YouTube, ~10 min)",time:"10 min"},
+        {text:"Complete 10 practice questions from ExamTopics or Whizlabs (free tier)",time:"25 min"},
+        {text:"Write a 1-paragraph summary of what you learned this week",time:"15 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"What is the AWS Shared Responsibility Model?",opts:["AWS handles everything — security, patching, and config","Customers handle all security including the physical data center","AWS secures the cloud infrastructure; customers secure what they put IN the cloud","Security is split 50/50 based on the service used"],ans:2,exp:"AWS secures 'security OF the cloud' (hardware, network, facilities) while the customer is responsible for 'security IN the cloud' (data, IAM, apps)."},
+        {q:"Which is an example of a customer's responsibility under the Shared Responsibility Model?",opts:["Physical security of data centers","Patching the hypervisor","Managing IAM user access and permissions","Maintaining AWS global network infrastructure"],ans:2,exp:"IAM (Identity and Access Management) is always the customer's responsibility. You control who has access to your AWS account and what they're allowed to do."},
+        {q:"Which AWS service lets you run code without managing any servers?",opts:["Amazon EC2","Amazon ECS","AWS Lambda","Amazon Lightsail"],ans:2,exp:"AWS Lambda is a serverless compute service. You upload your code and Lambda runs it in response to triggers without you managing any servers."},
+      ]
+    },
+  ]},
+  { week:2, title:"Security & Compliance", days:[
+    { title:"IAM — Identity & Access Management", subtitle:"Users, groups, roles, and policies",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 6: Security (IAM section)",time:"30 min"},
+        {text:"Learn: Root user vs IAM users — NEVER use root for daily tasks",time:"10 min"},
+        {text:"Learn: IAM Groups, Roles, Policies and the principle of least privilege",time:"25 min"},
+        {text:"Learn: Multi-Factor Authentication (MFA) — always enable on root account",time:"10 min"},
+        {text:"Practice: Draw a diagram of how Users → Groups → Policies work together",time:"20 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"What is the principle of least privilege in IAM?",opts:["Give all users admin access for ease of use","Grant only the permissions needed to perform a task","Rotate passwords every 90 days","Use the root account for all administrative tasks"],ans:1,exp:"Least privilege means giving users only the minimum permissions they need — nothing more. This reduces the blast radius if an account is compromised."},
+        {q:"50 developers all need the same S3 read access. What is the most efficient IAM approach?",opts:["Create a policy for each individual user","Create an IAM Group with the S3 read policy attached, then add all developers to the group","Use the root account to grant access","Enable public access on the S3 bucket"],ans:1,exp:"IAM Groups let you attach policies to multiple users at once. Adding all developers to a group with the appropriate policy is more efficient than per-user policies."},
+        {q:"Which adds an extra layer of security beyond just a username and password?",opts:["IAM Role","Access Key ID","Multi-Factor Authentication (MFA)","IAM Policy"],ans:2,exp:"MFA requires users to provide a second form of authentication (like a code from an app) in addition to their password. Strongly recommended especially for the root account."},
+      ]
+    },
+    { title:"AWS Security Services", subtitle:"Shield, WAF, Inspector, GuardDuty, Macie",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 6: Security (services section)",time:"30 min"},
+        {text:"Learn: AWS Shield (Standard vs Advanced) — DDoS protection",time:"15 min"},
+        {text:"Learn: AWS WAF — web application firewall, blocks bad web traffic",time:"10 min"},
+        {text:"Learn: Amazon GuardDuty — threat detection using ML",time:"10 min"},
+        {text:"Learn: Amazon Inspector — automated security assessments for EC2",time:"10 min"},
+        {text:"Learn: Amazon Macie — finds sensitive data (like PII) in S3",time:"10 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Which AWS service provides automatic DDoS protection at no extra charge?",opts:["AWS WAF","Amazon GuardDuty","AWS Shield Standard","AWS Inspector"],ans:2,exp:"AWS Shield Standard is automatically enabled for all AWS customers at no extra cost. It protects against common network and transport layer DDoS attacks."},
+        {q:"Which service uses machine learning to detect unusual account activity like cryptomining?",opts:["Amazon Macie","Amazon Inspector","Amazon GuardDuty","AWS Trusted Advisor"],ans:2,exp:"Amazon GuardDuty is a threat detection service that continuously monitors your AWS accounts for malicious activity using ML and threat intelligence."},
+        {q:"A healthcare company needs to find S3 buckets that contain patient records (PII). Which service helps?",opts:["AWS Shield","Amazon Macie","AWS WAF","Amazon Inspector"],ans:1,exp:"Amazon Macie uses machine learning to automatically discover and protect sensitive data in S3, including PII like names, SSNs, and credit card numbers."},
+      ]
+    },
+    { title:"Compliance & AWS Artifact", subtitle:"Compliance programs, audit reports, and data sovereignty",
+      tasks:[
+        {text:"Read: AWS Compliance Programs overview (aws.amazon.com/compliance)",time:"20 min"},
+        {text:"Learn: AWS Artifact — self-service portal for compliance reports (SOC 2, PCI, HIPAA)",time:"15 min"},
+        {text:"Understand: AWS compliance does NOT mean YOUR app is compliant — you still need to configure correctly",time:"10 min"},
+        {text:"Learn: AWS Config — tracks configuration changes and compliance over time",time:"15 min"},
+        {text:"Learn: AWS CloudTrail — logs all API calls for auditing and compliance",time:"20 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Where can an AWS customer download compliance reports like SOC 2 or PCI DSS for auditors?",opts:["AWS Trusted Advisor","Amazon GuardDuty","AWS Artifact","AWS Config"],ans:2,exp:"AWS Artifact is a self-service portal where customers can access AWS compliance reports and agreements, like SOC 2, PCI DSS, ISO 27001, and HIPAA BAA."},
+        {q:"Which service records a history of ALL API calls made in your account?",opts:["Amazon CloudWatch","AWS CloudTrail","AWS Config","Amazon Inspector"],ans:1,exp:"AWS CloudTrail logs every API call — who did what, when, and from which IP. It's the audit trail for security investigations and compliance."},
+        {q:"Which service continuously tracks resource configurations and flags compliance violations?",opts:["AWS Artifact","AWS CloudTrail","AWS Config","Amazon GuardDuty"],ans:2,exp:"AWS Config continuously monitors and records your resource configurations and evaluates them against desired rules. It alerts you when something drifts out of compliance."},
+      ]
+    },
+    { title:"Pricing, Billing & Cost Management", subtitle:"Pricing models, Cost Explorer, Budgets, and Support plans",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 8: Pricing and Support",time:"30 min"},
+        {text:"Learn: 3 AWS pricing fundamentals — compute, storage, data transfer OUT",time:"15 min"},
+        {text:"Learn: EC2 pricing models — On-Demand, Reserved, Spot, Savings Plans",time:"20 min"},
+        {text:"Learn: AWS Cost Explorer — visualize and analyze spending trends",time:"10 min"},
+        {text:"Learn: AWS Budgets — set alerts when spending exceeds a threshold",time:"10 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"A startup needs EC2 capacity for 1 year and wants the biggest discount. Which pricing model is best?",opts:["On-Demand Instances","Spot Instances","Reserved Instances (1-year term)","Dedicated Hosts"],ans:2,exp:"Reserved Instances offer up to 72% discount vs On-Demand when you commit to a 1 or 3 year term. For predictable, steady-state workloads they are the most cost-effective."},
+        {q:"Which EC2 pricing model lets AWS interrupt your instance at any time but offers the lowest price?",opts:["On-Demand","Reserved","Dedicated","Spot Instances"],ans:3,exp:"Spot Instances use spare AWS capacity and can be interrupted with 2-minute warning. They can be up to 90% cheaper than On-Demand, ideal for fault-tolerant batch processing."},
+        {q:"A CFO wants to be emailed if AWS spending exceeds $500 this month. Which tool?",opts:["AWS Cost Explorer","AWS Pricing Calculator","AWS Budgets","AWS Trusted Advisor"],ans:2,exp:"AWS Budgets lets you set custom cost and usage budgets and sends alerts (email/SNS) when you approach or exceed your defined thresholds."},
+      ]
+    },
+    { title:"Week 2 Review & Practice", subtitle:"Security and billing review + practice exam questions",
+      tasks:[
+        {text:"Review all Week 2 notes — focus on IAM, security services, compliance, billing",time:"20 min"},
+        {text:"Flashcard drill: GuardDuty vs Macie vs Inspector vs Shield vs WAF",time:"20 min"},
+        {text:"Complete 20 practice questions on ExamTopics (filter: Security & Pricing)",time:"30 min"},
+        {text:"Review any wrong answers and look up explanations",time:"20 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Which AWS Support plan provides a dedicated Technical Account Manager (TAM)?",opts:["Basic","Developer","Business","Enterprise"],ans:3,exp:"The Enterprise Support plan includes a dedicated TAM who provides proactive guidance, architecture reviews, and helps with operational issues."},
+        {q:"The AWS Free Tier offers 750 hours/month of which EC2 instance type for 12 months?",opts:["t3.large","t2.micro or t3.micro","m5.xlarge","c5.large"],ans:1,exp:"The AWS Free Tier includes 750 hours per month of t2.micro (or t3.micro in some regions) for the first 12 months. This is enough to run one instance continuously."},
+        {q:"What does the AWS TCO Calculator help customers do?",opts:["Calculate monthly bills for existing AWS usage","Compare the cost of running workloads on-premises vs on AWS","Estimate EC2 spot pricing in real-time","Calculate IAM policy cost"],ans:1,exp:"The TCO Calculator helps you estimate how much you can save by moving from on-premises infrastructure to AWS, including factors like hardware, facilities, and labor costs."},
+      ]
+    },
+  ]},
+  { week:3, title:"Technology & Services", days:[
+    { title:"Databases on AWS", subtitle:"RDS, Aurora, DynamoDB, Redshift, ElastiCache",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 5: Databases",time:"30 min"},
+        {text:"Learn: Amazon RDS — managed relational DB (MySQL, PostgreSQL, Oracle, SQL Server)",time:"20 min"},
+        {text:"Learn: Amazon Aurora — AWS's own high-performance relational DB (MySQL/PostgreSQL compatible)",time:"10 min"},
+        {text:"Learn: Amazon DynamoDB — fully managed NoSQL, key-value and document",time:"15 min"},
+        {text:"Learn: Amazon Redshift — data warehouse for analytics and big data",time:"10 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"A company needs a fully managed relational database with automatic backups and failover. Which service?",opts:["Amazon DynamoDB","Amazon RDS","Amazon Redshift","Amazon ElastiCache"],ans:1,exp:"Amazon RDS manages the heavy lifting of relational databases — including hardware provisioning, patching, backups, and automatic failover."},
+        {q:"Which database service handles millions of requests/second with single-digit millisecond latency?",opts:["Amazon RDS","Amazon Redshift","Amazon Aurora","Amazon DynamoDB"],ans:3,exp:"DynamoDB is a serverless NoSQL database built for high-performance at any scale. Ideal for gaming, IoT, and real-time apps."},
+        {q:"What is Amazon Redshift primarily used for?",opts:["Storing object files like images","Running containerized microservices","Analyzing large datasets using SQL — a data warehouse","Managing user authentication"],ans:2,exp:"Amazon Redshift is a fully managed data warehouse for running complex SQL analytics against petabytes of structured data. Built for OLAP workloads."},
+      ]
+    },
+    { title:"Networking & Content Delivery", subtitle:"VPC, Route 53, CloudFront, API Gateway",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 4: Networking",time:"30 min"},
+        {text:"Learn: VPC deep dive — subnets (public/private), route tables, internet gateways",time:"20 min"},
+        {text:"Learn: Amazon Route 53 — DNS service, routing policies (latency, weighted, failover)",time:"15 min"},
+        {text:"Learn: Amazon CloudFront — CDN that caches content at edge locations globally",time:"10 min"},
+        {text:"Learn: Elastic Load Balancer (ELB) — distributes traffic across multiple targets",time:"15 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"What is the purpose of an Internet Gateway in a VPC?",opts:["It restricts traffic between subnets","It enables communication between your VPC and the internet","It connects two VPCs together","It controls DNS routing"],ans:1,exp:"An Internet Gateway allows resources in public subnets to communicate with the internet. Without it, resources in a VPC have no internet connectivity."},
+        {q:"Which Route 53 routing policy routes users to the AWS region with the fastest response time?",opts:["Simple routing","Weighted routing","Latency-based routing","Geolocation routing"],ans:2,exp:"Latency-based routing routes users to the AWS region that provides the lowest network latency. Great for global applications with users in multiple continents."},
+        {q:"Which service distributes incoming application traffic across multiple EC2 instances?",opts:["Amazon CloudFront","Amazon Route 53","Elastic Load Balancing (ELB)","AWS Direct Connect"],ans:2,exp:"Elastic Load Balancing automatically distributes incoming traffic across multiple healthy targets in one or more AZs to ensure high availability."},
+      ]
+    },
+    { title:"Application Integration & Serverless", subtitle:"Lambda, SQS, SNS, EventBridge, Step Functions",
+      tasks:[
+        {text:"Watch: AWS Lambda intro video on AWS YouTube (15 min)",time:"15 min"},
+        {text:"Learn: AWS Lambda — event-driven serverless functions, no server management",time:"20 min"},
+        {text:"Learn: Amazon SQS — message queue to decouple application components",time:"15 min"},
+        {text:"Learn: Amazon SNS — pub/sub messaging, push notifications to many subscribers",time:"15 min"},
+        {text:"Understand the difference: SQS (pull-based queue) vs SNS (push-based topic)",time:"15 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Lambda scales automatically and you pay per invocation with no idle costs. What model is this?",opts:["Containerized computing","Serverless computing","Dedicated host computing","Spot instance computing"],ans:1,exp:"Serverless computing means you don't provision or manage servers. Lambda runs your code on demand and you only pay for the compute time your code actually uses."},
+        {q:"An e-commerce app needs to process orders one at a time and ensure no order is lost. Which service?",opts:["Amazon SNS","Amazon SQS","AWS Lambda","Amazon EventBridge"],ans:1,exp:"SQS is a durable, scalable message queue. Messages aren't lost if the consumer is temporarily unavailable — consumers poll at their own pace."},
+        {q:"A company wants to send one notification to email, SMS, and a mobile app simultaneously. Which service?",opts:["Amazon SQS","AWS Lambda","Amazon SNS","Amazon MQ"],ans:2,exp:"SNS uses a publish/subscribe model. One message to an SNS topic fans out instantly to all subscribers — email, SMS, Lambda, SQS queues, and mobile push."},
+      ]
+    },
+    { title:"Management & Monitoring", subtitle:"CloudWatch, CloudTrail, Systems Manager, Trusted Advisor",
+      tasks:[
+        {text:"Watch: AWS Skill Builder — Module 7: Monitoring and Analytics",time:"30 min"},
+        {text:"Learn: Amazon CloudWatch — metrics, alarms, dashboards, and logs",time:"20 min"},
+        {text:"Learn: AWS CloudTrail (review) — API audit logging for governance",time:"10 min"},
+        {text:"Learn: AWS Trusted Advisor — checks for cost, security, performance, fault tolerance, limits",time:"15 min"},
+        {text:"Learn: AWS Health Dashboard — status of AWS services and your account health events",time:"10 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Which service lets you set an alarm that emails you when EC2 CPU utilization exceeds 80%?",opts:["AWS CloudTrail","Amazon CloudWatch","AWS Trusted Advisor","AWS Config"],ans:1,exp:"CloudWatch collects metrics from AWS resources and lets you create alarms that trigger notifications or auto-scaling actions when thresholds are crossed."},
+        {q:"AWS Trusted Advisor provides recommendations in which categories?",opts:["Cost, security, performance, fault tolerance, service limits","Compliance, IAM, encryption, logging, patching","Networking, storage, compute, database, serverless","Lambda, EC2, S3, RDS, VPC optimization only"],ans:0,exp:"Trusted Advisor checks across 5 categories: Cost Optimization, Security, Fault Tolerance, Performance, and Service Limits, then gives actionable recommendations."},
+        {q:"Which tool gives a real-time view of AWS service health and scheduled maintenance events?",opts:["Amazon CloudWatch","AWS Trusted Advisor","AWS Health Dashboard","AWS Config"],ans:2,exp:"The AWS Health Dashboard shows overall service status and personal health events impacting your specific resources."},
+      ]
+    },
+    { title:"Week 3 Review & Practice", subtitle:"Technology services review + timed practice exam",
+      tasks:[
+        {text:"Review all Week 3 notes — databases, networking, serverless, monitoring",time:"20 min"},
+        {text:"Flashcard drill: All database services (RDS vs Aurora vs DynamoDB vs Redshift)",time:"15 min"},
+        {text:"Take a full 65-question timed practice exam (Whizlabs or ExamTopics)",time:"45 min"},
+        {text:"Review all wrong answers thoroughly — write down what you missed",time:"20 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"A company needs to transfer 50TB of data to AWS. Internet transfer would take weeks. Which service?",opts:["AWS DataSync","AWS Direct Connect","AWS Snowball","Amazon S3 Transfer Acceleration"],ans:2,exp:"AWS Snowball is a physical device AWS ships to you. You load your data on it and ship it back. For very large datasets it's faster and cheaper than internet transfer."},
+        {q:"What is the AWS Well-Architected Framework used for?",opts:["Pricing and billing estimates","A set of best practices to evaluate and improve cloud architectures","A compliance checklist for regulatory requirements","A tool to automatically provision infrastructure"],ans:1,exp:"The AWS Well-Architected Framework provides architectural best practices across 6 pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability."},
+        {q:"Which service helps migrate an on-premises database to AWS with minimal downtime?",opts:["AWS Snowball","AWS Database Migration Service (DMS)","Amazon RDS Restore","AWS Storage Gateway"],ans:1,exp:"AWS DMS replicates your source database to a target AWS database continuously, supporting both homogeneous and heterogeneous migrations with minimal downtime."},
+      ]
+    },
+  ]},
+  { week:4, title:"Exam Prep & Review", days:[
+    { title:"Cloud Architecture Best Practices", subtitle:"Well-Architected Framework, design principles",
+      tasks:[
+        {text:"Read: AWS Well-Architected Framework whitepaper intro (aws.amazon.com/architecture/well-architected)",time:"30 min"},
+        {text:"Study all 6 pillars: Operational Excellence, Security, Reliability, Performance, Cost, Sustainability",time:"30 min"},
+        {text:"Learn: Design for failure — always assume something will break, build for it",time:"10 min"},
+        {text:"Learn: Decoupling with SQS/SNS to avoid tight dependencies",time:"10 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"The Reliability pillar of the Well-Architected Framework focuses on which of the following?",opts:["Minimizing the cost of your workload","The ability to recover from failures and meet demand","Encrypting data at rest and in transit","Choosing the right compute for your workload"],ans:1,exp:"The Reliability pillar focuses on ensuring workloads perform their intended function correctly, including the ability to recover from failures and dynamically meet demand."},
+        {q:"Which design principle encourages small, independent components instead of one large application?",opts:["Monolithic architecture","Tight coupling","Loose coupling via microservices","Vertical scaling"],ans:2,exp:"Loose coupling means each component is independent and communicates through APIs or message queues. A failure in one component doesn't cascade to the whole system."},
+        {q:"In AWS, 'design for failure' means:",opts:["Expecting AWS services to be unreliable","Architecting apps to continue working even when individual components fail","Always having a backup region purchased in advance","Using only the most expensive, reliable instance types"],ans:1,exp:"Design for failure means assuming any component CAN fail and building redundancy, health checks, and auto-recovery into your architecture from the start."},
+      ]
+    },
+    { title:"High-Frequency Exam Topics", subtitle:"Services that appear most often on the CLF-C02",
+      tasks:[
+        {text:"Review: IAM, EC2, S3, RDS, VPC, Lambda, CloudWatch, CloudTrail (high-frequency)",time:"25 min"},
+        {text:"Review: Shared Responsibility Model — memorize which side each service falls on",time:"15 min"},
+        {text:"Review: EC2 pricing models (On-Demand vs Reserved vs Spot vs Savings Plans)",time:"15 min"},
+        {text:"Review: Support plans — Basic, Developer, Business, Enterprise differences",time:"10 min"},
+        {text:"Complete 30 practice questions on a topic you feel weakest in",time:"35 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Which component is always the customer's responsibility regardless of service type?",opts:["Physical hardware security","Hypervisor patching","Customer data and IAM configuration","Network infrastructure"],ans:2,exp:"Customer data and IAM are ALWAYS the customer's responsibility. AWS never touches your data or manages who can access your account."},
+        {q:"A company wants to commit to consistent compute usage for 1-3 years for the biggest savings. Which option?",opts:["On-Demand Instances","Spot Instances","Dedicated Hosts","Compute Savings Plans"],ans:3,exp:"Compute Savings Plans offer up to 66% savings vs On-Demand in exchange for committing to a consistent amount of usage for 1 or 3 years, with flexibility across instance types."},
+        {q:"Which Support plan is the minimum to get 24/7 phone and chat access to Cloud Support Engineers?",opts:["Basic","Developer","Business","Enterprise"],ans:2,exp:"The Business Support plan includes 24/7 phone, chat, and email access to Cloud Support Engineers for production issues."},
+      ]
+    },
+    { title:"Full Practice Exam Day", subtitle:"Simulate real exam conditions",
+      tasks:[
+        {text:"Set a timer for 90 minutes. No breaks, no phones — simulate the real exam",time:"90 min"},
+        {text:"Take a full 65-question CLF-C02 practice exam (Whizlabs, Tutorials Dojo, or ExamTopics)",time:"(in timer above)"},
+        {text:"Score yourself. AWS passing score is 700/1000 (roughly 70%)",time:"5 min"},
+        {text:"Review every wrong answer — look up the explanation for each one",time:"25 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"What score do you need to pass the AWS Cloud Practitioner exam (CLF-C02)?",opts:["650/1000","700/1000","720/1000","750/1000"],ans:1,exp:"The passing score for CLF-C02 is 700 out of 1000. The exam has 65 questions and you have 90 minutes to complete it."},
+        {q:"Which is an advantage of AWS over a traditional on-premises data center?",opts:["You need to estimate and purchase capacity upfront","You can go global in minutes using AWS's worldwide infrastructure","Physical hardware maintenance is your responsibility","All servers are shared with other customers in the same room"],ans:1,exp:"AWS lets you deploy in any of its global regions in minutes. This would take months of planning in a traditional on-premises model."},
+        {q:"'Patching the guest OS on an EC2 instance' falls under which Shared Responsibility category?",opts:["AWS responsibility","Customer responsibility","Shared equally","Only required for regulated industries"],ans:1,exp:"The guest OS on EC2 is the customer's responsibility. AWS manages the underlying hardware and hypervisor, but you patch the OS inside your EC2 instance."},
+      ]
+    },
+    { title:"Weak Areas & Final Review", subtitle:"Target your gaps and solidify key concepts",
+      tasks:[
+        {text:"Review all quiz results from this guide — identify which topics you missed most",time:"20 min"},
+        {text:"For each weak area: re-read notes, watch a short YouTube video, do 10 more practice Qs",time:"40 min"},
+        {text:"Final flashcard run through ALL key terms from all 4 weeks",time:"20 min"},
+        {text:"Read the official exam guide: search 'AWS CLF-C02 exam guide PDF'",time:"15 min"},
+        {text:"Take today's daily quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Amazon S3 guarantees what level of object durability?",opts:["99.9% (three nines)","99.99% (four nines)","99.999999999% (eleven nines)","100% — no data is ever lost"],ans:2,exp:"S3 is designed for 99.999999999% (eleven 9s) durability. If you stored 10 million objects, you'd expect to lose 1 object every 10,000 years."},
+        {q:"Which service helps a developer find, test, and buy third-party software to run on AWS?",opts:["AWS Marketplace","AWS Service Catalog","AWS Trusted Advisor","AWS OpsWorks"],ans:0,exp:"AWS Marketplace is a digital catalog with thousands of software listings from independent vendors. Billing is consolidated in your AWS bill."},
+        {q:"Which of the following is an example of scaling VERTICALLY on AWS?",opts:["Adding more EC2 instances behind a load balancer","Moving from a t2.micro to an m5.4xlarge EC2 instance","Deploying resources across multiple Availability Zones","Using Auto Scaling to launch instances during peak hours"],ans:1,exp:"Vertical scaling (scaling up) means increasing the size/power of an existing instance. Horizontal scaling (scaling out) means adding more instances."},
+      ]
+    },
+    { title:"Exam Day Preparation", subtitle:"Final review, logistics, and confidence building",
+      tasks:[
+        {text:"Light review only — focus on key mnemonics and service summaries",time:"30 min"},
+        {text:"Confirm exam details: date, time, location (in-person or online), ID requirements",time:"10 min"},
+        {text:"Prepare your ID and make sure your testing environment is ready (if online proctored)",time:"10 min"},
+        {text:"Rest well tonight — sleep is more valuable than last-minute cramming",time:"—"},
+        {text:"You've put in the work. Trust your preparation. You've got this! 🚀",time:"—"},
+        {text:"Take today's final review quiz below ✓",time:"10 min"},
+      ],
+      quiz:[
+        {q:"Which statement best describes AWS Availability Zones?",opts:["Single data centers within a Region","Multiple isolated locations within an AWS Region with independent power and networking","AWS offices available for customer visits","Geographic Regions with no connection to each other"],ans:1,exp:"AZs are physically separate facilities within a Region, each with independent power, cooling, and networking. Deploying across multiple AZs protects against single-point failures."},
+        {q:"The AWS Cloud enables 'elasticity.' What does this mean?",opts:["Your data is encrypted elastically","Resources can automatically scale in or out based on demand","AWS provides elastic IP addresses for all resources","Storage automatically compresses data"],ans:1,exp:"Elasticity means your infrastructure can automatically grow (scale out) when demand increases and shrink (scale in) when it drops — paying only for what you use."},
+        {q:"Which pillar of the Well-Architected Framework focuses on using cloud resources efficiently and rightsizing?",opts:["Reliability","Operational Excellence","Cost Optimization","Performance Efficiency"],ans:2,exp:"Cost Optimization focuses on avoiding unnecessary costs, rightsizing resources, and using the right pricing models. GOOD LUCK ON YOUR EXAM! 🎉"},
+      ]
+    },
+  ]},
+];
+
+let state = { checks: {}, quizAnswers: {} };
+let activeWeek = 0, activeDay = 0, quizIdx = 0;
+
+function taskKey(w,d,t){return 'w'+w+'d'+d+'t'+t;}
+function quizKey(w,d,q){return 'w'+w+'d'+d+'q'+q;}
+
+function dayComplete(w,d){
+  return curriculum[w].days[d].tasks.every((_,t)=>state.checks[taskKey(w,d,t)]);
+}
+function overallProgress(){
+  let total=0,done=0;
+  curriculum.forEach((wk,w)=>wk.days.forEach((_,d)=>{total++;if(dayComplete(w,d))done++;}));
+  return{total,done};
+}
+
+function buildSidebar(){
+  const aside=document.getElementById('sidebar');
+  aside.innerHTML='';
+  curriculum.forEach((wk,w)=>{
+    const lbl=document.createElement('div');
+    lbl.className='sidebar-label';
+    lbl.textContent='Week '+(w+1);
+    aside.appendChild(lbl);
+    const wb=document.createElement('button');
+    wb.className='week-btn'+(w===activeWeek?' active':'');
+    wb.innerHTML='<span>'+wk.title+'</span>';
+    aside.appendChild(wb);
+    wk.days.forEach((day,d)=>{
+      const done=dayComplete(w,d);
+      const db=document.createElement('button');
+      db.className='day-btn'+(done?' completed':'')+(w===activeWeek&&d===activeDay?' active':'');
+      db.innerHTML='<span class="day-dot"></span>Day '+(d+1)+': '+day.title.split('—')[0].trim();
+      db.onclick=()=>{activeWeek=w;activeDay=d;quizIdx=0;buildSidebar();buildMain();};
+      aside.appendChild(db);
+    });
+  });
+}
+
+function buildMain(){
+  const main=document.getElementById('main');
+  const w=activeWeek,d=activeDay;
+  const day=curriculum[w].days[d];
+  const wk=curriculum[w];
+  const checked=day.tasks.filter((_,t)=>state.checks[taskKey(w,d,t)]).length;
+  const pct=Math.round(checked/day.tasks.length*100);
+  const done=pct===100;
+
+  main.innerHTML=
+    '<div class="day-header">'+
+      '<div class="day-tag">Week '+(w+1)+' \u2014 '+wk.title+' \u00b7 Day '+(d+1)+' of 5</div>'+
+      '<div class="day-title">'+day.title+'</div>'+
+      '<div class="day-subtitle">'+day.subtitle+'</div>'+
+      '<div class="time-badge">\u23f1 ~2 hours \u00b7 Monday \u2013 Friday</div>'+
+    '</div>'+
+    '<div class="complete-banner'+(done?' show':'')+'" id="cb"><span style="font-size:26px">✅</span><div><h3>Day Complete!</h3><p>Great work. Move to the next day when you\'re ready.</p></div></div>'+
+    '<div class="day-progress-wrap">'+
+      '<div class="day-progress-bar"><div class="day-progress-fill" style="width:'+pct+'%"></div></div>'+
+      '<div class="day-progress-label">'+checked+'/'+day.tasks.length+' tasks</div>'+
+    '</div>'+
+    '<div class="section">'+
+      '<div class="section-header"><span>📋</span> Today\'s Tasks</div>'+
+      '<div class="checklist" id="cl"></div>'+
+    '</div>'+
+    '<div class="section">'+
+      '<div class="section-header"><span>🧠</span> Daily Knowledge Check</div>'+
+      '<div class="quiz-wrap" id="qw"></div>'+
+    '</div>';
+
+  const cl=document.getElementById('cl');
+  day.tasks.forEach((task,t)=>{
+    const key=taskKey(w,d,t);
+    const isChecked=!!state.checks[key];
+    const item=document.createElement('label');
+    item.className='check-item'+(isChecked?' checked':'');
+    item.innerHTML=
+      '<input type="checkbox"'+(isChecked?' checked':'')+'>'+
+      '<div class="checkmark">'+(isChecked?'✓':'')+'</div>'+
+      '<div class="check-text">'+task.text+'</div>'+
+      '<div class="check-time">'+task.time+'</div>';
+    item.onclick=function(e){
+      e.preventDefault();
+      state.checks[key]=!state.checks[key];
+      buildMain();buildSidebar();updateOverall();
+    };
+    cl.appendChild(item);
+  });
+  renderQuiz();
+  updateOverall();
+}
+
+function renderQuiz(){
+  const w=activeWeek,d=activeDay;
+  const day=curriculum[w].days[d];
+  const qw=document.getElementById('qw');
+  if(!qw)return;
+  const letters=['A','B','C','D'];
+
+  if(quizIdx>=day.quiz.length){
+    const correct=day.quiz.filter((q,i)=>state.quizAnswers[quizKey(w,d,i)]===q.ans).length;
+    const p=Math.round(correct/day.quiz.length*100);
+    const msg=p===100?'Perfect Score! 🎉':p>=66?'Good Job! 👍':'Keep Studying! 💪';
+    const sub=p===100?'You nailed every question.':p>=66?'Review any you missed.':'Re-read the material, then retry.';
+    qw.innerHTML=
+      '<div class="quiz-score-wrap">'+
+        '<div class="score-circle">'+p+'%</div>'+
+        '<div class="score-msg">'+msg+'</div>'+
+        '<div class="score-sub">'+correct+'/'+day.quiz.length+' correct \u00b7 '+sub+'</div>'+
+        '<button class="btn secondary" onclick="resetQuiz()">Retake Quiz</button>'+
+      '</div>';
+    return;
+  }
+
+  const q=day.quiz[quizIdx];
+  const answered=state.quizAnswers[quizKey(w,d,quizIdx)];
+  let html='<div class="quiz-q">Question '+(quizIdx+1)+' of '+day.quiz.length+': '+q.q+'</div>';
+  q.opts.forEach((opt,i)=>{
+    let cls='quiz-option';
+    if(answered!==undefined){cls+=' disabled';if(i===q.ans)cls+=' correct';else if(i===answered)cls+=' wrong';}
+    html+='<div class="'+cls+'" onclick="answerQuiz('+i+')"><div class="opt-letter">'+letters[i]+'</div><span>'+opt+'</span></div>';
+  });
+  if(answered!==undefined){
+    const ok=answered===q.ans;
+    html+='<div class="quiz-feedback '+(ok?'correct-fb':'wrong-fb')+' show">'+(ok?'✅ Correct! ':'❌ Not quite. ')+q.exp+'</div>';
+  }
+  html+='<div class="quiz-nav"><span class="quiz-counter">'+(quizIdx+1)+' / '+day.quiz.length+'</span>';
+  if(answered!==undefined)html+='<button class="btn" onclick="nextQuiz()">'+(quizIdx<day.quiz.length-1?'Next Question →':'See Results')+'</button>';
+  html+='</div>';
+  qw.innerHTML=html;
+}
+
+function answerQuiz(i){
+  const key=quizKey(activeWeek,activeDay,quizIdx);
+  if(state.quizAnswers[key]!==undefined)return;
+  state.quizAnswers[key]=i;
+  renderQuiz();
+}
+function nextQuiz(){quizIdx++;renderQuiz();}
+function resetQuiz(){
+  curriculum[activeWeek].days[activeDay].quiz.forEach((_,i)=>{delete state.quizAnswers[quizKey(activeWeek,activeDay,i)];});
+  quizIdx=0;renderQuiz();
+}
+function updateOverall(){
+  const{total,done}=overallProgress();
+  const p=Math.round(done/total*100);
+  document.getElementById('overallPct').textContent=p+'%';
+  document.getElementById('overallFill').style.width=p+'%';
+  document.getElementById('overallDays').textContent=done+'/'+total+' days';
+}
+
+buildSidebar();
+buildMain();
+</script>
+
+</body>
+</html>
